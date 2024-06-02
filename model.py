@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 from dataloader import BitmapDataset
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 import pickle
 from torch.optim import Adam
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
@@ -141,12 +141,16 @@ if __name__ == '__main__':
     with open('data/dataset.pkl', 'rb') as f:
         pk_dataset = pickle.load(f)
     dataset = BitmapDataset(pk_dataset)
+    train_dataset, val_dataset = random_split(dataset, [int(len(dataset) * 0.8), len(dataset) - int(len(dataset) * 0.8)])
     del pk_dataset
-    dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
+    del dataset
+    
+    train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+    val_dataloader = DataLoader(val_dataset, batch_size=4, shuffle=True)
     model = CNN()
     loss_fn = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=0.001)
-    train(model, dataloader, dataloader, loss_fn, optimizer, 10)
+    train(model, train_dataloader, val_dataloader, loss_fn, optimizer, 10)
     
     # save model
     torch.save(model.state_dict(), 'model.pth')
