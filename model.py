@@ -123,7 +123,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, n_epochs,
         print(f'Epoch {epoch + 1}/{n_epochs}')
         train_metrics = train_epoch(model, train_dataloader, loss_fn, optimizer)
         print(f'Train: Accuracy: {train_metrics["accuracy"]}, Precision: {train_metrics["precision"]}, Recall: {train_metrics["recall"]}, F1: {train_metrics["f1"]}, Loss: {train_metrics["loss"]}')
-        val_metrics = validate_epoch(model, val_dataloader, loss_fn, optimizer)
+        val_metrics = validate_epoch(model, val_dataloader, loss_fn)
         print(f'Validation: Accuracy: {val_metrics["accuracy"]}, Precision: {val_metrics["precision"]}, Recall: {val_metrics["recall"]}, F1: {val_metrics["f1"]}, Loss: {val_metrics["loss"]}')
         writer.add_scalar('Accuracy/train', train_metrics['accuracy'], epoch)
         writer.add_scalar('Precision/train', train_metrics['precision'], epoch)
@@ -147,5 +147,13 @@ if __name__ == '__main__':
     loss_fn = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=0.001)
     train(model, dataloader, dataloader, loss_fn, optimizer, 10)
+    
+    # save model
+    torch.save(model.state_dict(), 'model.pth')
+    # load model
+    # model = CNN()
+    # model.load_state_dict(torch.load('model.pth'))
+    # model.eval()
+    
     
     
