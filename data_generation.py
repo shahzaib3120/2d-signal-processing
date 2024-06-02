@@ -6,7 +6,7 @@ import pickle
 data_path = 'data/'
 dataset = {
     'frequencies': np.linspace(2, 20, 100),
-    'noise_levels': np.linspace(0, 1, 50),
+    'noise_levels': np.linspace(0, 0.5, 20),
     'signals': {
         'original': [],
         'noisy': []
