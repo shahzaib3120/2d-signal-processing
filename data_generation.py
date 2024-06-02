@@ -4,9 +4,16 @@ import matplotlib.pyplot as plt
 import pickle
 
 data_path = 'data/'
+fs = 1000
+t = np.linspace(0, 1, fs)
+frequencies = np.linspace(2, 20, 100)
+noise_levels = np.linspace(1/50, 0.5, 20)
+
+
 dataset = {
-    'frequencies': np.linspace(2, 20, 100),
-    'noise_levels': np.linspace(0, 0.5, 20),
+    'frequencies': frequencies,
+    'noise_levels': noise_levels,
+    'time': t,
     'signals': {
         'original': [],
         'noisy': []
@@ -17,10 +24,7 @@ dataset = {
     }
 }
 
-fs = 1000
-t = np.linspace(0, 1, fs)
-frequencies = np.linspace(2, 20, 100)
-noise_levels = np.linspace(1/50, 1, 50)
+
 for f in frequencies:
     signal = np.sin(2 * np.pi * f * t)
     bitmap = signal_to_bitmap(signal)
