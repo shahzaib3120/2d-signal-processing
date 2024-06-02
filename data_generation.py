@@ -7,7 +7,7 @@ data_path = 'data/'
 fs = 1000
 t = np.linspace(0, 1, fs)
 frequencies = np.linspace(2, 20, 100)
-noise_levels = np.linspace(1/50, 0.5, 20)
+noise_levels = np.linspace(1/50, 0.5, 10)
 
 
 dataset = {
