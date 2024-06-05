@@ -6,9 +6,10 @@ import pickle
 data_path = 'data/'
 fs = 1000
 t = np.linspace(0, 1, fs)
-frequencies = np.linspace(2, 20, 100)
-noise_levels = np.linspace(1/50, 0.5, 20)
-
+frequencies = np.linspace(2, 20, 1000)
+# noise_levels = np.linspace(1/50, 0.5, 2)
+# choose 2 random noise levels
+noise_levels = np.random.uniform(0.1, 0.4, 2)
 
 dataset = {
     'frequencies': frequencies,

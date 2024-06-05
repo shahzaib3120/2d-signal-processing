@@ -5,7 +5,7 @@ from dataloader import BitmapDataset
 from torch.utils.data import DataLoader, random_split
 import pickle
 from torch.optim import Adam
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
 # add tensorboard support
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
@@ -78,13 +78,15 @@ def train_epoch(model, dataloader, loss_fn, optimizer):
     }
     
 
-def validate_epoch(model, dataloader, loss_fn):
+def validate_epoch(model, dataloader, loss_fn, return_preds=False):
     model.eval()
     accuracy = 0
     precision = 0
     recall = 0
     f1 = 0
     eval_loss = 0
+    all_preds = []
+    all_labels = []
     progress_bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for idx,batch in enumerate(dataloader):
         progress_bar.set_description(f'Batch {idx + 1}/{len(dataloader)}')
@@ -92,11 +94,17 @@ def validate_epoch(model, dataloader, loss_fn):
         labels = batch['label']
         bitmaps = bitmaps.unsqueeze(1).float()
         output = model(bitmaps)
+        preds = output.argmax(dim=1)
+        
+        if return_preds:
+            all_preds.extend(preds.tolist())
+            all_labels.extend(labels.tolist())
+        
         loss = loss_fn(output, labels)
-        batch_accuracy = accuracy_score(labels, output.argmax(dim=1))
-        batch_precision = precision_score(labels, output.argmax(dim=1))
-        batch_recall = recall_score(labels, output.argmax(dim=1))
-        batch_f1 = f1_score(labels, output.argmax(dim=1))
+        batch_accuracy = accuracy_score(labels, preds)
+        batch_precision = precision_score(labels, preds)
+        batch_recall = recall_score(labels, preds)
+        batch_f1 = f1_score(labels, preds)
         
         accuracy += batch_accuracy
         precision += batch_precision
@@ -108,6 +116,16 @@ def validate_epoch(model, dataloader, loss_fn):
         progress_bar.update()
     progress_bar.close()
     
+    if return_preds:
+        return {
+            'accuracy': accuracy / len(dataloader),
+            'precision': precision / len(dataloader),
+            'recall': recall / len(dataloader),
+            'f1': f1 / len(dataloader),
+            'loss': eval_loss / len(dataloader),
+            'preds': all_preds,
+            'labels': all_labels
+        }
     return {
         'accuracy': accuracy / len(dataloader),
         'precision': precision / len(dataloader),
@@ -123,7 +141,12 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, n_epochs,
         print(f'Epoch {epoch + 1}/{n_epochs}')
         train_metrics = train_epoch(model, train_dataloader, loss_fn, optimizer)
         print(f'Train: Accuracy: {train_metrics["accuracy"]}, Precision: {train_metrics["precision"]}, Recall: {train_metrics["recall"]}, F1: {train_metrics["f1"]}, Loss: {train_metrics["loss"]}')
-        val_metrics = validate_epoch(model, val_dataloader, loss_fn)
+        if epoch == n_epochs - 1:
+            val_metrics = validate_epoch(model, val_dataloader, loss_fn, return_preds=True)
+            print(f'Validation: Accuracy: {val_metrics["accuracy"]}, Precision: {val_metrics["precision"]}, Recall: {val_metrics["recall"]}, F1: {val_metrics["f1"]}, Loss: {val_metrics["loss"]}')
+            writer.add_pr_curve('Precision-Recall Curve', val_metrics['labels'], val_metrics['preds'])
+        else:
+            val_metrics = validate_epoch(model, val_dataloader, loss_fn, return_preds=False)
         print(f'Validation: Accuracy: {val_metrics["accuracy"]}, Precision: {val_metrics["precision"]}, Recall: {val_metrics["recall"]}, F1: {val_metrics["f1"]}, Loss: {val_metrics["loss"]}')
         writer.add_scalar('Accuracy/train', train_metrics['accuracy'], epoch)
         writer.add_scalar('Precision/train', train_metrics['precision'], epoch)
@@ -136,6 +159,8 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, n_epochs,
         writer.add_scalar('F1/val', val_metrics['f1'], epoch)
         writer.add_scalar('Loss/val', val_metrics['loss'], epoch)
     writer.close()
+    
+    return val_metrics
     
 if __name__ == '__main__':
     with open('data/dataset.pkl', 'rb') as f:
@@ -150,10 +175,21 @@ if __name__ == '__main__':
     model = CNN()
     loss_fn = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=0.001)
-    train(model, train_dataloader, val_dataloader, loss_fn, optimizer, 10)
+    val_metrics = train(model, train_dataloader, val_dataloader, loss_fn, optimizer, 2)
     
     # save model
     torch.save(model.state_dict(), 'model.pth')
+    
+    # classification report
+    preds = val_metrics['preds']
+    labels = val_metrics['labels']
+    print(classification_report(labels, preds))
+    
+    
+    # plot confusion matrix
+    cm = confusion_matrix(labels, preds)
+    print(cm)
+    
     # load model
     # model = CNN()
     # model.load_state_dict(torch.load('model.pth'))

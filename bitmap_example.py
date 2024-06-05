@@ -5,7 +5,7 @@ from skimage.metrics import structural_similarity as ssim
 from bitmap import signal_to_bitmap
 
 
-noise = np.linspace(0, 1, 100)
+noise = np.linspace(0, 2, 200)
 correlation_original = []
 correlation_1D = []
 miou = []
@@ -91,6 +91,60 @@ plt.ylabel('Samples')
 
 plt.suptitle('$\sigma = 0.1$, q = 100')
 plt.tight_layout()
+
+
+noisy_signal = pure_sine_signal + np.random.normal(0, 1, num_samples)
+noisy_bitmap = signal_to_bitmap(noisy_signal)
+
+plt.figure(figsize=(10, 6))
+plt.subplot(3, 1, 1)
+plt.imshow(pure_sine_bitmap, cmap='gray', aspect='auto')
+plt.title('Original Signal Bitmap')
+plt.xlabel('Time')
+plt.ylabel('Samples')
+
+
+plt.subplot(3, 1, 2)
+plt.imshow(noisy_bitmap, cmap='gray', aspect='auto')
+plt.title('Noisy Signal Bitmap')
+plt.xlabel('Time')
+plt.ylabel('Samples')
+
+plt.subplot(3, 1, 3)
+plt.plot(-noisy_signal)
+plt.title('Noisy Signal')
+plt.xlabel('Time')
+plt.ylabel('Samples')
+
+plt.suptitle('$\sigma = 1$, q = 100')
+plt.tight_layout()
+
+noisy_signal = pure_sine_signal + np.random.normal(0, 1.5, num_samples)
+noisy_bitmap = signal_to_bitmap(noisy_signal)
+
+plt.figure(figsize=(10, 6))
+plt.subplot(3, 1, 1)
+plt.imshow(pure_sine_bitmap, cmap='gray', aspect='auto')
+plt.title('Original Signal Bitmap')
+plt.xlabel('Time')
+plt.ylabel('Samples')
+
+
+plt.subplot(3, 1, 2)
+plt.imshow(noisy_bitmap, cmap='gray', aspect='auto')
+plt.title('Noisy Signal Bitmap')
+plt.xlabel('Time')
+plt.ylabel('Samples')
+
+plt.subplot(3, 1, 3)
+plt.plot(-noisy_signal)
+plt.title('Noisy Signal')
+plt.xlabel('Time')
+plt.ylabel('Samples')
+
+plt.suptitle('$\sigma = 1.5$, q = 100')
+plt.tight_layout()
+
 
 
 
