@@ -25,3 +25,27 @@ mIoU and 2D correlation drop very sharply as the noise level increases but this 
 1D correlation shows a linear drop in the similarity as the standard deviation of the noise increases. The drop is linear and hence it is not sensitive enough to differentiate between the noisy and original signal.
 
 However, SSI (structural similarity index) shows a non-linear drop in the similarity as the standard deviation of the noise increases. The response is a decaying exponential settling at a normalized value of about 0.6. This makes it a good candidate for differentiating between the noisy and original signal as it is sensitive enough to pick up the difference at low SNR levels and also robust enough to not get affected by high SNR levels.
+
+## FPGA Implementation
+
+Afterwards, a synthetic dataset was trained for noisy and original signals. The dataset was trained using a CNN model as outlined in the `model.py` file.
+
+Following the workflow outlined in the diagram below, the model is deployed on FPGA using the FINN HLS library.
+
+![Workflow](./fpga.png)
+
+The main advantage of deploying the model on FPGA is the reduction in latency and power consumption. The model is deployed on the PYNQ-Z1 board and the results are shown below.
+
+![FPGA](./power.png)
+
+A graph shows better representation of the power consumption and latency of the model on FPGA as compared to the CPU and GPU.
+
+![FPGA](./graph.png)
+
+Following synthesis results were obtained for the model on FPGA.
+
+![FPGA](./synth1.png)
+
+![FPGA](./synth2.png)
+
+![FPGA](./synth3.png)
