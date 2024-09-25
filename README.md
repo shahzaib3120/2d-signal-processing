@@ -1,4 +1,4 @@
-# 2d-signal-processing
+# 2D Signal processing
 
 This project aims to explore a novel technique of 2D signal processing. The technique is based on the concept of 2D convolution and is used to process 2D signals.
 
